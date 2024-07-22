@@ -2,6 +2,9 @@ syntax = "proto3";
 package pb;
 option go_package = "internal/pb";
 
+// Define a blank message to be used on services that does not need parameters
+message Blank {}
+
 // Define the category object, like a struct entity
 message Category {
     string id = 1;
@@ -9,14 +12,19 @@ message Category {
     string description = 3;
 }
 
-// Define the Request DTO for creating a new category (onyl with the payload needed)
+// Define the Request DTO for creating a new category (only with the payload needed)
 message CreateCategoryRequest {
     string name = 1;
     string description = 2;
 }
 
+// Define the get all categories proto DTO
+message CategoryList {
+    repeated Category categories = 1;
+}
 
 // Define the service related to Category with its methods (like a repository pattern)
 service CategoryService {
     rpc CreateCategory(CreateCategoryRequest) returns (Category) {}
+    rpc ListCategories(Blank) returns (CategoryList) {}
 }
