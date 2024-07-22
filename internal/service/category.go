@@ -68,3 +68,26 @@ func (c *CategoryService) ListCategories(context.Context, *pb.Blank) (*pb.Catego
 
 	return res, nil
 }
+
+func (c *CategoryService) GetCategory(ctx context.Context, in *pb.GetCategoryByIdRequest) (*pb.Category, error) {
+	// Try to get the category from DB using the received ID
+	categoryDb, err := c.categoryRepository.FindByID(in.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if the category was not found
+	if categoryDb == nil {
+		// Return an error message
+		return nil, fmt.Errorf("category not found")
+	}
+
+	// Define the response based on gRPC service DTO
+	res := &pb.Category{
+		Id:          categoryDb.ID,
+		Name:        categoryDb.Name,
+		Description: categoryDb.Description,
+	}
+
+	return res, nil
+}

@@ -18,6 +18,11 @@ message CreateCategoryRequest {
     string description = 2;
 }
 
+// Define the request DTO for getting one category by ID
+message GetCategoryByIdRequest {
+    string id = 1;
+}
+
 // Define the get all categories proto DTO
 message CategoryList {
     repeated Category categories = 1;
@@ -27,4 +32,5 @@ message CategoryList {
 service CategoryService {
     rpc CreateCategory(CreateCategoryRequest) returns (Category) {}
     rpc ListCategories(Blank) returns (CategoryList) {}
+    rpc GetCategory(GetCategoryByIdRequest) returns (Category) {}
 }
