@@ -123,3 +123,36 @@ func (c *CategoryService) CreateCategoryStream(stream pb.CategoryService_CreateC
 		})
 	}
 }
+
+func (c *CategoryService) CreateCategoryStreamBidirectional(stream pb.CategoryService_CreateCategoryStreamBidirectionalServer) error {
+	for {
+		category, err := stream.Recv()
+		// Validate if the stream has ended (there is no more data to be sent)
+		if err == io.EOF {
+			// Close the stream sending all mapped categories
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+
+		// Create a new category on DB
+		createdCategory, err := c.categoryRepository.Create(category.Name, category.Description)
+		if err != nil {
+			return err
+		}
+
+		// Create a new gRPC response DTO category
+		res := &pb.Category{
+			Id:          createdCategory.ID,
+			Name:        createdCategory.Name,
+			Description: createdCategory.Description,
+		}
+
+		// Send the stream response
+		err = stream.Send(res)
+		if err != nil {
+			return err
+		}
+	}
+}
