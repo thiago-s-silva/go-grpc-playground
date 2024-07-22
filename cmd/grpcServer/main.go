@@ -9,7 +9,6 @@ import (
 	"github.com/thiago-s-silva/grpc-example/internal/repositories"
 	"github.com/thiago-s-silva/grpc-example/internal/service"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 )
 
 func main() {
@@ -33,7 +32,6 @@ func main() {
 	pb.RegisterCategoryServiceServer(grpcServer, categoryService)
 
 	// register the reflection service
-	reflection.Register(grpcServer)
 
 	// TCP Connection
 	// open a new TCP connection for the default gRPC port
