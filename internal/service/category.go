@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"io"
 
 	"github.com/thiago-s-silva/grpc-example/internal/pb"
 	"github.com/thiago-s-silva/grpc-example/internal/repositories"
@@ -90,4 +91,35 @@ func (c *CategoryService) GetCategory(ctx context.Context, in *pb.GetCategoryByI
 	}
 
 	return res, nil
+}
+
+func (c *CategoryService) CreateCategoryStream(stream pb.CategoryService_CreateCategoryStreamServer) error {
+	// Define a list of categories using gRPC DTO format
+	categories := &pb.CategoryList{}
+
+	// Loop to listen the requests from the stream
+	for {
+		category, err := stream.Recv()
+		// Validate if the stream has ended (there is no more data to be sent)
+		if err == io.EOF {
+			// Close the stream sending all mapped categories
+			return stream.SendAndClose(categories)
+		}
+		if err != nil {
+			return err
+		}
+
+		// Create a new category on DB
+		createdCategory, err := c.categoryRepository.Create(category.Name, category.Description)
+		if err != nil {
+			return err
+		}
+
+		// Append the created category on the stream list
+		categories.Categories = append(categories.Categories, &pb.Category{
+			Id:          createdCategory.ID,
+			Name:        createdCategory.Name,
+			Description: createdCategory.Description,
+		})
+	}
 }
